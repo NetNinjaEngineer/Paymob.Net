@@ -26,7 +26,7 @@ namespace Paymob.Net
 
             var content = new StringContent(serializedData, System.Text.Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync(_baseUrl + endpointUrl, content);
+            var response = await httpClient.PostAsync(endpointUrl, content);
 
             response.EnsureSuccessStatusCode();
 
