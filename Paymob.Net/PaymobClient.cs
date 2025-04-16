@@ -1,32 +1,21 @@
-﻿using System.Net.Http.Headers;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Paymob.Net.Models;
 
 namespace Paymob.Net
 {
-    public sealed class PaymobClient : IDisposable
+    public sealed class PaymobClient(HttpClient httpClient) : IDisposable
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiKey;
-        private readonly string _baseUrl = "https://accept.paymob.com/api/";
         private string _authToken = string.Empty;
 
-        public PaymobClient(HttpClient httpClient, string apiKey)
+        public async Task<AuthResponse> AuthenticateAsync(string apiKey)
         {
-            _httpClient = httpClient;
-            _apiKey = apiKey;
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        }
-
-        public async Task<AuthResponse> AuthenticateAsync()
-        {
-            var authRequest = new AuthRequest { ApiKey = _apiKey };
+            var authRequest = new AuthRequest { ApiKey = apiKey };
             var response = await PostAsync<AuthResponse>("/auth/tokens", authRequest);
             _authToken = response.Token;
             return response!;
         }
 
-        public void Dispose() => _httpClient.Dispose();
+        public void Dispose() => httpClient.Dispose();
 
         private async Task<T> PostAsync<T>(string endpointUrl, object data)
         {
@@ -37,7 +26,7 @@ namespace Paymob.Net
 
             var content = new StringContent(serializedData, System.Text.Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(_baseUrl + endpointUrl, content);
+            var response = await httpClient.PostAsync(_baseUrl + endpointUrl, content);
 
             response.EnsureSuccessStatusCode();
 
