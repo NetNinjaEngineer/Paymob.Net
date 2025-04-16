@@ -4,7 +4,27 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Paymob.Net</PackageId>
+	<Version>1.0.0</Version>
+	<Authors>Mohamed ElHelaly</Authors>
+	<Description>.NET client library for the Paymob payment gateway API</Description>
+	<PackageTags>payment;gateway;paymob;api;dotnet</PackageTags>
+	<PackageProjectUrl>https://github.com/NetNinjaEngineer/Paymob.Net</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/NetNinjaEngineer/Paymob.Net</RepositoryUrl>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<Product>Paymob.Net</Product>
+	<Company>Mohamed ElHelaly</Company>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Title>Paymob Payment Gateway API Client for .NET</Title>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />

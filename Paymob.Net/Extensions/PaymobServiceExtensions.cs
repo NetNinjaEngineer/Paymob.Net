@@ -30,7 +30,11 @@ namespace Paymob.Net.Extensions
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             });
 
-            services.AddScoped<IPaymobAuthService, PaymobAuthService>();
+            services.AddSingleton<IPaymobAuthenticationService>(sp =>
+            {
+                var paymobClient = sp.GetRequiredService<PaymobClient>();
+                return new PaymobAuthenticationService(paymobClient, apiKey);
+            });
 
 
             return services;

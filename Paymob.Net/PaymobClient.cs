@@ -3,15 +3,12 @@ using Paymob.Net.Models;
 
 namespace Paymob.Net
 {
-    public sealed class PaymobClient(HttpClient httpClient) : IDisposable
+    internal sealed class PaymobClient(HttpClient httpClient) : IDisposable
     {
-        private string _authToken = string.Empty;
-
         public async Task<AuthResponse> AuthenticateAsync(string apiKey)
         {
             var authRequest = new AuthRequest { ApiKey = apiKey };
             var response = await PostAsync<AuthResponse>("/auth/tokens", authRequest);
-            _authToken = response.Token;
             return response!;
         }
 
