@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using Paymob.Net.Models;
 
@@ -12,7 +11,6 @@ namespace Paymob.Net
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
-        private string _authToken = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymobClient"/> class.
@@ -37,7 +35,6 @@ namespace Paymob.Net
         public async Task<AuthResponse> AuthenticateAsync(AuthRequest authRequest, CancellationToken cancellationToken = default)
         {
             var response = await PostAsync<AuthResponse>("auth/tokens", authRequest, cancellationToken);
-            _authToken = response.Token;
             return response;
         }
 
@@ -48,7 +45,6 @@ namespace Paymob.Net
         /// <returns></returns>
         public async Task<OrderRegistrationResponse> RegisterOrderAsync(OrderRegistrationRequest request)
         {
-            EnsureAuthenticated();
             return await PostAsync<OrderRegistrationResponse>("ecommerce/orders", request);
         }
 
@@ -59,7 +55,6 @@ namespace Paymob.Net
         /// <returns></returns>
         public async Task<PaymentKeyResponse> RequestPaymentKeyAsync(PaymentKeyRequest request)
         {
-            EnsureAuthenticated();
             return await PostAsync<PaymentKeyResponse>("/acceptance/payment_keys", request);
         }
 
@@ -70,7 +65,6 @@ namespace Paymob.Net
         /// <returns></returns>
         public async Task<PaymentResponse> ProcessPaymentAsync(PaymentRequest request)
         {
-            EnsureAuthenticated();
             return await PostAsync<PaymentResponse>("/acceptance/payments/pay", request);
         }
 
@@ -81,7 +75,6 @@ namespace Paymob.Net
         /// <returns></returns>
         public async Task<TransactionResponse> GetTransactionAsync(string transactionId)
         {
-            EnsureAuthenticated();
             return await GetAsync<TransactionResponse>($"/acceptance/transactions/{transactionId}");
         }
 
@@ -92,7 +85,6 @@ namespace Paymob.Net
         /// <returns></returns>
         public async Task<RefundResponse> RefundTransactionAsync(RefundRequest request)
         {
-            EnsureAuthenticated();
             return await PostAsync<RefundResponse>("/acceptance/void_refund/refund", request);
         }
 
@@ -143,13 +135,6 @@ namespace Paymob.Net
 
             var result = JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
             return result == null ? throw new JsonException($"Failed to deserialize response to type {typeof(T).Name}") : result;
-        }
-
-        private void EnsureAuthenticated()
-        {
-            if (string.IsNullOrEmpty(_authToken))
-                throw new InvalidOperationException("Client is not authenticated. Call AuthenticateAsync() first.");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
         }
 
     }
