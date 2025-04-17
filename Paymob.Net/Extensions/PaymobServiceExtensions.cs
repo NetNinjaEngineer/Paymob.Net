@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Paymob.Net.Interfaces;
 using Paymob.Net.Services;
 
@@ -11,33 +13,50 @@ namespace Paymob.Net.Extensions
     public static class PaymobServiceExtensions
     {
         /// <summary>
-        ///  Adds Paymob services to the specified IServiceCollection
+        /// Adds Paymob services to the specified IServiceCollection with default configuration
         /// </summary>
         /// <param name="services">The IServiceCollection to add services to</param>
         /// <param name="apiKey">Your Paymob API Key</param>
         /// <returns>The IServiceCollection so that additional calls can be chained</returns>
-        /// <exception cref="ArgumentNullException">Throws ArgumentNullException if the services is null</exception>
+        /// <exception cref="ArgumentNullException">Thrown if services or apiKey is null</exception>
         public static IServiceCollection AddPaymob(this IServiceCollection services, string apiKey)
         {
             ArgumentNullException.ThrowIfNull(services);
+            ArgumentException.ThrowIfNullOrEmpty(apiKey, nameof(apiKey));
 
-            if (string.IsNullOrEmpty(apiKey))
-                throw new ArgumentNullException(nameof(apiKey));
-
-            services.AddHttpClient<PaymobClient>(client =>
+            return services.AddPaymob(options =>
             {
-                client.BaseAddress = new Uri("https://accept.paymob.com/api");
+                options.ApiKey = apiKey;
+            });
+        }
+
+        /// <summary>
+        /// Adds Paymob services to the specified IServiceCollection with custom configuration
+        /// </summary>
+        /// <param name="services">The IServiceCollection to add services to</param>
+        /// <param name="configureOptions">A delegate to configure the PaymobClientOptions</param>
+        /// <returns>The IServiceCollection so that additional calls can be chained</returns>
+        /// <exception cref="ArgumentNullException">Thrown if services or configureOptions is null</exception>
+        public static IServiceCollection AddPaymob(this IServiceCollection services, Action<PaymobClientOptions> configureOptions)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            ArgumentNullException.ThrowIfNull(configureOptions);
+
+            services.Configure(configureOptions);
+
+            services.AddHttpClient<PaymobClient>((serviceProvider, client) =>
+            {
+                var paymobOptions = serviceProvider.GetRequiredService<IOptions<PaymobClientOptions>>().Value;
+                client.BaseAddress = new Uri(paymobOptions.BaseUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.Timeout = TimeSpan.FromSeconds(paymobOptions.TimeoutSeconds);
             });
 
-            services.AddSingleton<IPaymobAuthenticationService>(sp =>
-            {
-                var paymobClient = sp.GetRequiredService<PaymobClient>();
-                return new PaymobAuthenticationService(paymobClient, apiKey);
-            });
-
+            services.AddScoped<IPaymobAuthenticationService, PaymobAuthenticationService>();
 
             return services;
         }
+
     }
 }

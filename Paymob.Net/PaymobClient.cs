@@ -1,36 +1,66 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
 using Paymob.Net.Models;
 
 namespace Paymob.Net
 {
-    internal sealed class PaymobClient(HttpClient httpClient) : IDisposable
+    /// <summary>
+    /// Client for interacting with the Paymob payment gateway API.
+    /// </summary>
+    public sealed class PaymobClient : IDisposable
     {
-        public async Task<AuthResponse> AuthenticateAsync(string apiKey)
+        private readonly HttpClient _httpClient;
+        private readonly JsonSerializerOptions _jsonOptions;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PaymobClient"/> class.
+        /// </summary>
+        /// <param name="httpClient">The HTTP client to use for API requests.</param>
+        public PaymobClient(HttpClient httpClient)
         {
-            var authRequest = new AuthRequest { ApiKey = apiKey };
-            var response = await PostAsync<AuthResponse>("/auth/tokens", authRequest);
+            _httpClient = httpClient;
+            _jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+        }
+
+        /// <summary>
+        /// Authenticates with the Paymob API and retrieves an auth token.
+        /// </summary>
+        /// /// <param name="authRequest">The authentication request containing the API key.</param>
+        /// <param name="cancellationToken">A token to cancel the operation.</param>
+        /// <returns>The authentication response.</returns>
+        public async Task<AuthResponse> AuthenticateAsync(AuthRequest authRequest, CancellationToken cancellationToken = default)
+        {
+            var response = await PostAsync<AuthResponse>("auth/tokens", authRequest, cancellationToken);
             return response!;
         }
 
-        public void Dispose() => httpClient.Dispose();
+        /// <summary>
+        /// Disposes of resources used by the client.
+        /// </summary>
+        public void Dispose() => _httpClient.Dispose();
 
-        private async Task<T> PostAsync<T>(string endpointUrl, object data)
+        private async Task<T> PostAsync<T>(string endpointUrl, object data, CancellationToken cancellationToken = default)
         {
-            var serializedData = JsonSerializer.Serialize(data, new JsonSerializerOptions
+            var response = await _httpClient.PostAsJsonAsync(endpointUrl, data, _jsonOptions, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            var content = new StringContent(serializedData, System.Text.Encoding.UTF8, "application/json");
+                throw new PaymobApiException(
+                    $"API request failed with status code {(int)response.StatusCode}",
+                    response.StatusCode,
+                    errorContent);
+            }
 
-            var response = await httpClient.PostAsync(endpointUrl, content);
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            response.EnsureSuccessStatusCode();
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            return JsonSerializer.Deserialize<T>(responseContent,
-                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })!;
+            var result = JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
+            return result == null ? throw new JsonException($"Failed to deserialize response to type {typeof(T).Name}") : result;
         }
 
     }

@@ -3,14 +3,16 @@
 namespace Paymob.Net.Interfaces
 {
     /// <summary>
-    /// Interface for Paymob Authentication services API
+    /// Service for handling Paymob authentication.
     /// </summary>
     public interface IPaymobAuthenticationService
     {
         /// <summary>
-        /// Authenticates with the Paymob API and retrieves an authentication token
+        /// Authenticates with the Paymob API and retrieves an auth token.
         /// </summary>
-        /// <returns>AuthResponse containing the token and merchant profile information</returns>
-        Task<AuthResponse> AuthenticateAsync();
+        /// <param name="authRequest">The authentication request containing the API key.</param>
+        /// <param name="cancellationToken">A token to cancel the operation.</param>
+        /// <returns>The authentication response containing the token.</returns>
+        Task<AuthResponse> AuthenticateAsync(AuthRequest authRequest, CancellationToken cancellationToken = default);
     }
 }

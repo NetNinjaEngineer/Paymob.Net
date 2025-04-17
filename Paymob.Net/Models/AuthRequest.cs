@@ -7,5 +7,4 @@ namespace Paymob.Net.Models
         [JsonPropertyName("api_key")]
         public string ApiKey { get; set; } = null!;
     }
-
 }

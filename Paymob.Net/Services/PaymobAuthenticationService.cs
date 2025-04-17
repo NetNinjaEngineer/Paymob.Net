@@ -4,13 +4,18 @@ using Paymob.Net.Models;
 namespace Paymob.Net.Services
 {
     /// <summary>
-    /// Service for handling Paymob authentication
+    /// Implementation of the Paymob authentication service.
     /// </summary>
-    /// <param name="paymobClient"></param>
-    /// <param name="apiKey"></param>
-    internal sealed class PaymobAuthenticationService(PaymobClient paymobClient, string apiKey) : IPaymobAuthenticationService
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="PaymobAuthenticationService"/> class.
+    /// </remarks>
+    /// <param name="client">The Paymob client.</param>
+    public class PaymobAuthenticationService(PaymobClient client) : IPaymobAuthenticationService
     {
         /// <inheritdoc/>
-        public async Task<AuthResponse> AuthenticateAsync() => await paymobClient.AuthenticateAsync(apiKey);
+        public async Task<AuthResponse> AuthenticateAsync(AuthRequest authRequest, CancellationToken cancellationToken = default)
+        {
+            return await client.AuthenticateAsync(authRequest, cancellationToken);
+        }
     }
 }
