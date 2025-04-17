@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Paymob.Net.Extensions;
 using Paymob.Net.Interfaces;
-using Paymob.Net.Models;
 
 namespace Paymob.Net.IntegrationTests.Services
 {
@@ -34,10 +33,8 @@ namespace Paymob.Net.IntegrationTests.Services
         [Fact]
         public async Task AuthenticateAsync_WithValidApiKey_ReturnsValidToken()
         {
-            var authRequest = new AuthRequest { ApiKey = _apiKey };
-
             // ACT
-            var result = await _paymobAuthenticationService?.AuthenticateAsync(authRequest)!;
+            var result = await _paymobAuthenticationService?.AuthenticateAsync()!;
 
             // ASSERT
             Assert.NotNull(result);

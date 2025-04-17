@@ -53,7 +53,12 @@ namespace Paymob.Net.Extensions
                 client.Timeout = TimeSpan.FromSeconds(paymobOptions.TimeoutSeconds);
             });
 
-            services.AddScoped<IPaymobAuthenticationService, PaymobAuthenticationService>();
+            services.AddScoped<IPaymobAuthenticationService, PaymobAuthenticationService>(sp =>
+            {
+                var paymobClient = sp.GetRequiredService<PaymobClient>();
+                var paymobOptions = sp.GetRequiredService<IOptions<PaymobClientOptions>>();
+                return new PaymobAuthenticationService(paymobClient, paymobOptions);
+            });
 
             return services;
         }

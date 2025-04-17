@@ -13,6 +13,6 @@ namespace Paymob.Net.Interfaces
         /// <param name="authRequest">The authentication request containing the API key.</param>
         /// <param name="cancellationToken">A token to cancel the operation.</param>
         /// <returns>The authentication response containing the token.</returns>
-        Task<AuthResponse> AuthenticateAsync(AuthRequest authRequest, CancellationToken cancellationToken = default);
+        Task<AuthResponse> AuthenticateAsync(CancellationToken cancellationToken = default);
     }
 }
