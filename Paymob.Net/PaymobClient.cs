@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Paymob.Net.Models;
 
@@ -11,6 +12,7 @@ namespace Paymob.Net
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private string _authToken = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymobClient"/> class.
@@ -35,8 +37,88 @@ namespace Paymob.Net
         public async Task<AuthResponse> AuthenticateAsync(AuthRequest authRequest, CancellationToken cancellationToken = default)
         {
             var response = await PostAsync<AuthResponse>("auth/tokens", authRequest, cancellationToken);
-            return response!;
+            _authToken = response.Token;
+            return response;
         }
+
+        /// <summary>
+        /// Registers a new order with the Paymob API.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<OrderRegistrationResponse> RegisterOrderAsync(OrderRegistrationRequest request)
+        {
+            EnsureAuthenticated();
+            return await PostAsync<OrderRegistrationResponse>("ecommerce/orders", request);
+        }
+
+        /// <summary>
+        /// Requests a payment key from the Paymob API.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<PaymentKeyResponse> RequestPaymentKeyAsync(PaymentKeyRequest request)
+        {
+            EnsureAuthenticated();
+            return await PostAsync<PaymentKeyResponse>("/acceptance/payment_keys", request);
+        }
+
+        /// <summary>
+        /// Pay for an order using the Paymob API.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<PaymentResponse> ProcessPaymentAsync(PaymentRequest request)
+        {
+            EnsureAuthenticated();
+            return await PostAsync<PaymentResponse>("/acceptance/payments/pay", request);
+        }
+
+        /// <summary>
+        /// Gets the status of a transaction using the Paymob API.
+        /// </summary>
+        /// <param name="transactionId"></param>
+        /// <returns></returns>
+        public async Task<TransactionResponse> GetTransactionAsync(string transactionId)
+        {
+            EnsureAuthenticated();
+            return await GetAsync<TransactionResponse>($"/acceptance/transactions/{transactionId}");
+        }
+
+        /// <summary>
+        /// Refunds a transaction using the Paymob API.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<RefundResponse> RefundTransactionAsync(RefundRequest request)
+        {
+            EnsureAuthenticated();
+            return await PostAsync<RefundResponse>("/acceptance/void_refund/refund", request);
+        }
+
+        private async Task<T> GetAsync<T>(string requestUri, CancellationToken cancellationToken = default)
+        {
+            var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                throw new PaymobApiException(
+                    $"API request failed with status code {(int)response.StatusCode}",
+                    response.StatusCode,
+                    errorContent);
+            }
+
+
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            var result = JsonSerializer.Deserialize<T>(content, _jsonOptions);
+
+            return result == null ? throw new JsonException($"Failed to deserialize response to type {typeof(T).Name}") : result;
+
+        }
+
 
         /// <summary>
         /// Disposes of resources used by the client.
@@ -61,6 +143,13 @@ namespace Paymob.Net
 
             var result = JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
             return result == null ? throw new JsonException($"Failed to deserialize response to type {typeof(T).Name}") : result;
+        }
+
+        private void EnsureAuthenticated()
+        {
+            if (string.IsNullOrEmpty(_authToken))
+                throw new InvalidOperationException("Client is not authenticated. Call AuthenticateAsync() first.");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
         }
 
     }

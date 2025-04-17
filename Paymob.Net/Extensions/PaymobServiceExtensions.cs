@@ -1,9 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Paymob.Net.Interfaces;
-using Paymob.Net.Services;
 
 namespace Paymob.Net.Extensions
 {
@@ -24,10 +21,7 @@ namespace Paymob.Net.Extensions
             ArgumentNullException.ThrowIfNull(services);
             ArgumentException.ThrowIfNullOrEmpty(apiKey, nameof(apiKey));
 
-            return services.AddPaymob(options =>
-            {
-                options.ApiKey = apiKey;
-            });
+            return services.AddPaymob(options => options.ApiKey = apiKey);
         }
 
         /// <summary>
@@ -53,11 +47,11 @@ namespace Paymob.Net.Extensions
                 client.Timeout = TimeSpan.FromSeconds(paymobOptions.TimeoutSeconds);
             });
 
-            services.AddScoped<IPaymobAuthenticationService, PaymobAuthenticationService>(sp =>
+            services.AddScoped<IPaymobService, PaymobService>(sp =>
             {
                 var paymobClient = sp.GetRequiredService<PaymobClient>();
                 var paymobOptions = sp.GetRequiredService<IOptions<PaymobClientOptions>>();
-                return new PaymobAuthenticationService(paymobClient, paymobOptions);
+                return new PaymobService(paymobClient, paymobOptions);
             });
 
             return services;
