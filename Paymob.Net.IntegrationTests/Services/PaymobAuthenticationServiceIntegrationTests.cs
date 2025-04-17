@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Paymob.Net.Extensions;
 using Paymob.Net.Interfaces;
@@ -12,7 +13,12 @@ namespace Paymob.Net.IntegrationTests.Services
 
         public PaymobAuthenticationServiceIntegrationTests()
         {
-            _apiKey = "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2T1RrNE9USXpMQ0p1WVcxbElqb2lhVzVwZEdsaGJDSjkuVVQ2Z3VqU2I1SkthNy03NGZDLTZ2c1dzOE1pd2h4bjRhRTdqMlMwb1l4QTZWYmlPRTBQa3J3cHBDMkoyX0NqOVcwZDQ5UTJsbi1IQTU4Ujlva2ZsVnc=";
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            _apiKey = config["Paymob:ApiKey"] ?? throw new ArgumentNullException("API key not found in configuration.");
 
             var services = new ServiceCollection();
 
