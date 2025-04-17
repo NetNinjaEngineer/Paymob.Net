@@ -24,15 +24,3 @@ Add Paymob services to your `Program.cs`:
 // Program.cs in .NET 6+
 builder.Services.AddPaymob(apiKey: "YOUR_API_KEY");
 ```
-
-## API Coverage
-
-This library supports all major Paymob API endpoints:
-
-- Authentication
-- Order Registration
-- Payment Key Generation
-- Payment Processing
-- Transaction Retrieval
-- Refunds
-- Webhook Validation and Processing
