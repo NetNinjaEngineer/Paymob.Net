@@ -1,10 +1,7 @@
-﻿namespace Paymob.Net.Models
+﻿namespace Paymob.Net.Models;
+
+public sealed class AuthResponse
 {
-    public sealed class AuthResponse
-    {
-        public Profile Profile { get; set; } = null!;
-
-        public string Token { get; set; } = null!;
-    }
-
+    public Profile Profile { get; set; } = null!;
+    public string Token { get; set; } = null!;
 }

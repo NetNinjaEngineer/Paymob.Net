@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Paymob.Net</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <Authors>Mohamed ElHelaly</Authors>
     <Description>A .NET client library for the Paymob payment gateway API. Easy to integrate and use in your .NET applications.</Description>
     <PackageTags>payment;gateway;paymob;api;dotnet;egypt;payment-gateway</PackageTags>
