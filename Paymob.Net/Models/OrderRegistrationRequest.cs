@@ -7,27 +7,24 @@ public class OrderRegistrationRequest
     [JsonPropertyName("auth_token")]
     public string AuthToken { get; set; } = null!;
 
-    [JsonPropertyName("delivery_needed")]
-    public bool DeliveryNeeded { get; set; }
-
-    [JsonPropertyName("merchant_id")]
-    public string MerchantId { get; set; } = null!;
+    [JsonPropertyName("api_source")]
+    public string ApiSource { get; set; } = null!;
 
     [JsonPropertyName("amount_cents")]
-    public int AmountCents { get; set; }
+    public string AmountCents { get; set; } = null!;
 
     [JsonPropertyName("currency")]
     public string Currency { get; set; } = null!;
 
-    [JsonPropertyName("merchant_order_id")]
-    public string MerchantOrderId { get; set; } = null!;
+    [JsonPropertyName("shipping_data")]
+    public ShippingData ShippingData { get; set; } = null!;
+
+    [JsonPropertyName("integrations")]
+    public List<int> Integrations { get; set; } = [];
 
     [JsonPropertyName("items")]
     public List<OrderItem> Items { get; set; } = [];
 
-    [JsonPropertyName("shipping_data")]
-    public ShippingData ShippingData { get; set; } = null!;
-
-    [JsonPropertyName("shipping_details")]
-    public ShippingDetails ShippingDetails { get; set; } = null!;
+    [JsonPropertyName("delivery_needed")]
+    public string DeliveryNeeded { get; set; } = null!;
 }

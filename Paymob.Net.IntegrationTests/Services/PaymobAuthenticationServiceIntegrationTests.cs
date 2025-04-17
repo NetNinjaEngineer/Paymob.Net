@@ -1,14 +1,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Paymob.Net.Extensions;
-using Paymob.Net.Interfaces;
 
 namespace Paymob.Net.IntegrationTests.Services
 {
     public class PaymobAuthenticationServiceIntegrationTests
     {
-        private readonly IPaymobAuthenticationService? _paymobAuthenticationService;
         private readonly string _apiKey;
+        private readonly IPaymobService? _paymobAuthenticationService;
 
         public PaymobAuthenticationServiceIntegrationTests()
         {
@@ -25,7 +24,7 @@ namespace Paymob.Net.IntegrationTests.Services
 
             var serviceProvider = services.BuildServiceProvider();
 
-            _paymobAuthenticationService = serviceProvider.GetService<IPaymobAuthenticationService>();
+            _paymobAuthenticationService = serviceProvider.GetService<IPaymobService>();
 
         }
 
